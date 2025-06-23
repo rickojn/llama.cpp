@@ -31,7 +31,7 @@
 .idea/
 .swiftpm
 .vs/
-.vscode/
+# .vscode/
 nppBackup
 
 
