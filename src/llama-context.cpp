@@ -5,6 +5,7 @@
 #include "llama-mmap.h"
 #include "llama-model.h"
 #include "llama-kv-cache.h"
+#include "/home/rickojn/coding/llama.cpp/ggml/src/ggml-impl.h"
 
 #include <cstring>
 #include <stdexcept>
@@ -834,6 +835,36 @@ int llama_context::encode(llama_batch & inp_batch) {
     return 0;
 }
 
+// Recursively search up to `depth` levels through both src0 and src1
+// and return the first GGML_OP_GET_ROWS node found, or nullptr.
+static ggml_tensor * find_get_rows(ggml_tensor * t, int depth) {
+    if (depth < 0 || t == nullptr) return nullptr;
+    if (t->op == GGML_OP_GET_ROWS) return t;
+    // try src0
+    if (ggml_tensor * r = find_get_rows(t->src[0], depth - 1)) return r;
+    // then try src1
+    return find_get_rows(t->src[1], depth - 1);
+}
+
+// Returns the first GGML_OP_ROPE whose GET_ROWS lookup tensor at `token_pos`
+// has the value `token_id`, or nullptr if none found.
+ggml_tensor * find_rope_for_token( ggml_cgraph *gf, int token_pos, int32_t token_id) {
+    int n = ggml_graph_n_nodes(gf);
+    for (int i = 0; i < n; ++i) {
+        ggml_tensor *t = gf->nodes[i];
+        if (t->op != GGML_OP_ROPE) continue;
+        // search up n levels for GET_ROWS
+        ggml_tensor *get_rows = find_get_rows(t, 5);
+        if (!get_rows) continue;
+        // get_rows->src1 holds the indices array
+        const int32_t *idx = (const int32_t *) ggml_get_data(get_rows->src[1]);
+        if (idx[token_pos] == token_id) {
+            return t;
+        }
+    }
+    return nullptr;
+}
+
 int llama_context::decode(llama_batch & inp_batch) {
     if (inp_batch.n_tokens == 0) {
         LLAMA_LOG_ERROR("%s: n_tokens == 0\n", __func__);
@@ -961,6 +992,18 @@ int llama_context::decode(llama_batch & inp_batch) {
                     return -3;
             }
         }
+
+        //custard
+        int           token_pos = 2;  // third token in the sequence
+        int32_t       token_id  = 1559;
+        ggml_tensor * rope      = find_rope_for_token(gf, token_pos, token_id);
+        if (rope) {
+            printf("Found ROPE node %p for token %d at position %d\n", (void *) rope, token_id, token_pos);
+        } else {
+            fprintf(stderr, "No matching ROPE node found\n");
+        }
+        //custard
+
 
         // plot the computation graph in dot format (for debugging purposes)
         //if (n_past%100 == 0) {
