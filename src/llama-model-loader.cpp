@@ -651,6 +651,8 @@ llama_model_loader::llama_model_loader(
             }
         }
 
+        printf("Custardy's paw prints!!!!!!\n");
+
         LLAMA_LOG_INFO("%s: Dumping metadata keys/values. Note: KV overrides do not apply in this output.\n", __func__);
 
         for (int i = 0; i < n_kv; i++) {
