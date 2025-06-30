@@ -5455,8 +5455,22 @@ void ggml_compute_forward_rope(
             } break;
         case GGML_TYPE_F32:
             {
+                // printf("ggml_compute_forward_rope: dst->name = %s\n", dst->name);
                 ggml_compute_forward_rope_f32(params, dst, true);
-            } break;
+                // need to identify 1st element of 3rd token embedding
+                for (int db_i = 0; db_i < 128 * 3 * 2; db_i++) {                 
+                    float actual   = ((float *) (dst->src[0]->data))[db_i];
+                    float expected = 0.120177865f;
+                    float epsilon  = 1e-6f;
+    
+                    if (fabsf(actual - expected) < epsilon) {
+                        printf("ggml_compute_forward_rope: src data = %f\n",
+                               ((float *) (dst->src[0]->data))[db_i]);
+                        printf("ggml_compute_forward_rope: dest data = %f\n", ((float *) (dst->data))[db_i]);
+                    }
+                }
+            }
+            break;
         default:
             {
                 GGML_ABORT("fatal error");
