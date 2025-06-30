@@ -2836,10 +2836,119 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         /*.threadpool=*/ tp,
     };
 
+    //custard
+    int db_num_tokens = cgraph->nodes[0]->ne[1];
+    printf("db_num_tokens = %d\n", db_num_tokens);
+    //custard
+
     for (int node_n = 0; node_n < cgraph->n_nodes && atomic_load_explicit(&tp->abort, memory_order_relaxed) != node_n; node_n++) {
         struct ggml_tensor * node = cgraph->nodes[node_n];
 
         ggml_compute_forward(&params, node);
+
+        //custard
+        static const char * GGML_OP_NAME[GGML_OP_COUNT] = {
+    "NONE",
+
+    "DUP",
+    "ADD",
+    "ADD1",
+    "ACC",
+    "SUB",
+    "MUL",
+    "DIV",
+    "SQR",
+    "SQRT",
+    "LOG",
+    "SIN",
+    "COS",
+    "SUM",
+    "SUM_ROWS",
+    "MEAN",
+    "ARGMAX",
+    "COUNT_EQUAL",
+    "REPEAT",
+    "REPEAT_BACK",
+    "CONCAT",
+    "SILU_BACK",
+    "NORM",
+    "RMS_NORM",
+    "RMS_NORM_BACK",
+    "GROUP_NORM",
+    "L2_NORM",
+
+    "MUL_MAT",
+    "MUL_MAT_ID",
+    "OUT_PROD",
+
+    "SCALE",
+    "SET",
+    "CPY",
+    "CONT",
+    "RESHAPE",
+    "VIEW",
+    "PERMUTE",
+    "TRANSPOSE",
+    "GET_ROWS",
+    "GET_ROWS_BACK",
+    "DIAG",
+    "DIAG_MASK_INF",
+    "DIAG_MASK_ZERO",
+    "SOFT_MAX",
+    "SOFT_MAX_BACK",
+    "ROPE",
+    "ROPE_BACK",
+    "CLAMP",
+    "CONV_TRANSPOSE_1D",
+    "IM2COL",
+    "IM2COL_BACK",
+    "CONV_2D_DW",
+    "CONV_TRANSPOSE_2D",
+    "POOL_1D",
+    "POOL_2D",
+    "POOL_2D_BACK",
+    "UPSCALE",
+    "PAD",
+    "PAD_REFLECT_1D",
+    "ARANGE",
+    "TIMESTEP_EMBEDDING",
+    "ARGSORT",
+    "LEAKY_RELU",
+
+    "FLASH_ATTN_EXT",
+    "FLASH_ATTN_BACK",
+    "SSM_CONV",
+    "SSM_SCAN",
+    "WIN_PART",
+    "WIN_UNPART",
+    "GET_REL_POS",
+    "ADD_REL_POS",
+    "RWKV_WKV6",
+    "GATED_LINEAR_ATTN",
+    "RWKV_WKV7",
+
+    "UNARY",
+
+    "MAP_CUSTOM1",
+    "MAP_CUSTOM2",
+    "MAP_CUSTOM3",
+
+    "CUSTOM",
+
+    "CROSS_ENTROPY_LOSS",
+    "CROSS_ENTROPY_LOSS_BACK",
+    "OPT_STEP_ADAMW",
+};
+        if (db_num_tokens == 1){
+            printf("OP %s node->data[0] = %f\n", GGML_OP_NAME[node->op], ((float *)node->data)[0]);
+        }
+        else{
+            printf("OP %s node->data[4096*2] = %f\n", GGML_OP_NAME[node->op], ((float *)node->data)[4096*2]);
+        }
+
+        
+
+        //custard
 
         if (state->ith == 0 && cplan->abort_callback &&
                 cplan->abort_callback(cplan->abort_callback_data)) {

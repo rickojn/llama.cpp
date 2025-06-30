@@ -836,16 +836,6 @@ int llama_context::encode(llama_batch & inp_batch) {
     return 0;
 }
 
-// Recursively search up to `depth` levels through both src0 and src1
-// and return the first GGML_OP_GET_ROWS node found, or nullptr.
-static ggml_tensor * find_get_rows(ggml_tensor * t, int depth) {
-    if (depth < 0 || t == nullptr) return nullptr;
-    if (t->op == GGML_OP_GET_ROWS) return t;
-    // try src0
-    if (ggml_tensor * r = find_get_rows(t->src[0], depth - 1)) return r;
-    // then try src1
-    return find_get_rows(t->src[1], depth - 1);
-}
 
 
 int llama_context::decode(llama_batch & inp_batch) {
@@ -977,14 +967,14 @@ int llama_context::decode(llama_batch & inp_batch) {
         }
 
         // plot the computation graph in dot format (for debugging purposes)
-            // Append current timestamp to file name
-            {
-                auto t = std::time(nullptr);
-                char timestamp[32];
-                std::strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", std::localtime(&t));
-                std::string dot_file = std::string("llama_") + timestamp + ".dot";
-                ggml_graph_dump_dot(gf, NULL, dot_file.c_str());
-            }
+            // // Append current timestamp to file name
+            // {
+            //     auto t = std::time(nullptr);
+            //     char timestamp[32];
+            //     std::strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", std::localtime(&t));
+            //     std::string dot_file = std::string("llama_") + timestamp + ".dot";
+            //     ggml_graph_dump_dot(gf, NULL, dot_file.c_str());
+            // }
 
 
         auto * t_logits = cparams.embeddings ? nullptr         : res->get_logits();
