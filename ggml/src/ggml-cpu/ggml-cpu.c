@@ -2844,7 +2844,14 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
     for (int node_n = 0; node_n < cgraph->n_nodes && atomic_load_explicit(&tp->abort, memory_order_relaxed) != node_n; node_n++) {
         struct ggml_tensor * node = cgraph->nodes[node_n];
 
+        if (strcmp(node->name, "node_20") == 0) {
+            // This is a special case for debugging purposes
+            // It prints the first element of the 3rd token in the node data
+            // This is useful to check if the data is being processed correctly
+            printf("things different here!\n");
+        }
         ggml_compute_forward(&params, node);
+
 
         //custard
         static const char * GGML_OP_NAME[GGML_OP_COUNT] = {
