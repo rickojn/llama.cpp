@@ -2939,7 +2939,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
             "CROSS_ENTROPY_LOSS_BACK",
             "OPT_STEP_ADAMW",
         };
-        int token3_first_element_idx = db_num_tokens == 3 ? 0 : 4096 * 2; 
+        int token3_first_element_idx = db_num_tokens == 3 ? 4096 * 2 : 0; 
         printf("%s %s  1st element 3rd token = %f\n", GGML_OP_NAME[node->op], node->name,
             ((float *) node->data)[token3_first_element_idx]);
        
