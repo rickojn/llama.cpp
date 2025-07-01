@@ -1238,6 +1238,10 @@ static void ggml_compute_forward_mul_mat_one_chunk(
                 //    vec_dot(ne00, &dst_col[ir0], src0_row + ir0*nb01, src1_col);
                 //}
 
+                if (strcmp(dst->name, "node_20") == 0){
+                    int db_custard = 0;
+                }
+
                 for (int64_t ir0 = iir0; ir0 < iir0 + blck_0 && ir0 < ir0_end; ir0 += num_rows_per_vec_dot) {
                     vec_dot(ne00, &tmp[ir0 - iir0], (num_rows_per_vec_dot > 1 ? 16 : 0), src0_row + ir0 * nb01, (num_rows_per_vec_dot > 1 ? nb01 : 0), src1_col, (num_rows_per_vec_dot > 1 ? src1_col_stride : 0), num_rows_per_vec_dot);
                 }
@@ -1361,20 +1365,23 @@ UseGgmlGemm1:;
         const void* wdata = (src1->type == vec_dot_type) ? src1->data : params->wdata;
         const size_t row_size = ggml_row_size(vec_dot_type, ne10);
 
-        for (int64_t i13 = 0; i13 < ne13; i13++)
-            for (int64_t i12 = 0; i12 < ne12; i12++)
-                if (!llamafile_sgemm(params,
-                                     ne01, ne11, ne00/ggml_blck_size(src0->type),
-                                     (const char *)src0->data + i12/r2*nb02 + i13/r3*nb03,
-                                     nb01/ggml_type_size(src0->type),
-                                     (const char *)wdata + (i12*ne11 + i13*ne12*ne11)*row_size,
-                                     row_size/ggml_type_size(vec_dot_type),
-                                     (char *)dst->data + i12*nb2 + i13*nb3,
-                                     nb1/ggml_type_size(dst->type),
-                                     src0->type,
-                                     vec_dot_type,
-                                     dst->type))
+        for (int64_t i13 = 0; i13 < ne13; i13++) {
+            for (int64_t i12 = 0; i12 < ne12; i12++) {
+                if (!llamafile_sgemm(params, ne01, ne11, ne00 / ggml_blck_size(src0->type),
+                                     (const char *) src0->data + i12 / r2 * nb02 + i13 / r3 * nb03,
+                                     nb01 / ggml_type_size(src0->type),
+                                     (const char *) wdata + (i12 * ne11 + i13 * ne12 * ne11) * row_size,
+                                     row_size / ggml_type_size(vec_dot_type),
+                                     (char *) dst->data + i12 * nb2 + i13 * nb3, nb1 / ggml_type_size(dst->type),
+                                     src0->type, vec_dot_type, dst->type)) {
                     goto UseGgmlGemm2;
+                } else {
+                    if (strcmp(dst->name, "node_20") == 0) {
+                        int db_custard = 0;
+                    }
+                }
+            }
+        }
         return;
     }
 UseGgmlGemm2:;
@@ -2946,7 +2953,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
             "CROSS_ENTROPY_LOSS_BACK",
             "OPT_STEP_ADAMW",
         };
-        int token3_first_element_idx = db_num_tokens == 3 ? 4096 * 2 : 0; 
+        int token3_first_element_idx = db_num_tokens == 3 ? node->ne[0] * 2 : 0; 
         printf("%s %s  1st element 3rd token = %f\n", GGML_OP_NAME[node->op], node->name,
             ((float *) node->data)[token3_first_element_idx]);
        
