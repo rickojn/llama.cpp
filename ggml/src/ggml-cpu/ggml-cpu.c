@@ -2954,8 +2954,9 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
             "OPT_STEP_ADAMW",
         };
         int token3_first_element_idx = db_num_tokens == 3 ? node->ne[0] * 2 : 0; 
-        printf("%s %s  1st element 3rd token = %f\n", GGML_OP_NAME[node->op], node->name,
-            ((float *) node->data)[token3_first_element_idx]);
+        printf("%s %s element = %f ne[0] = %d ne[1]= %d ne[2] = %d ne [3] = %d\n", GGML_OP_NAME[node->op], node->name,
+            ((float *) node->data)[token3_first_element_idx],
+            node->ne[0], node->ne[1], node->ne[2], node->ne[3]);
        
         //custard
 
