@@ -2851,11 +2851,12 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
     for (int node_n = 0; node_n < cgraph->n_nodes && atomic_load_explicit(&tp->abort, memory_order_relaxed) != node_n; node_n++) {
         struct ggml_tensor * node = cgraph->nodes[node_n];
 
-        // if (strcmp(node->name, "node_20") == 0) {
-        if (strcmp(node->name, "Qcur-0 (reshaped)") == 0) {
-            printf("reshape ....\n");
-        }
+        
         ggml_compute_forward(&params, node);
+
+        if (strcmp(node->name, "node_22") == 0) {
+            int db = 0;
+        }
 
 
         //custard
@@ -2959,11 +2960,11 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         else if (element_count == 4096 || element_count == 32000) {
             token3_first_element_idx = 0;
         }
-        if (token3_first_element_idx >= 0) {
+        // if (token3_first_element_idx >= 0) {
             printf("%s %s element = %f ne[0] = %d ne[1]= %d ne[2] = %d ne [3] = %d\n", GGML_OP_NAME[node->op], node->name,
                 ((float *) node->data)[token3_first_element_idx],
                 node->ne[0], node->ne[1], node->ne[2], node->ne[3]);
-        }
+        // }
        
         //custard
 
