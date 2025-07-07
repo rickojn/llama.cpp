@@ -2852,12 +2852,16 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         struct ggml_tensor * node = cgraph->nodes[node_n];
 
 
-        if (strcmp(node->name, "node_22") == 0) {
+        // if (strcmp(node->name, "node_22") == 0) {
+        //     int db = 0;
+        // }
+
+        
+        ggml_compute_forward(&params, node);
+        
+        if (node_n == 74){
             int db = 0;
         }
-
-        ggml_compute_forward(&params, node);
-
 
 
         //custard
@@ -2955,9 +2959,17 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         };
         int token3_first_element_idx = -1; 
         int element_count = node->ne[0] * node->ne[1] * node->ne[2] * node->ne[3];
-        if (element_count == 4096 * 3 || element_count == 32000 * 3) {
-            token3_first_element_idx = 4096 * 2;
+        if (element_count == 4096 * 3) {
+            if (node->ne[0] == 128 && node->ne[2] == 32){
+                token3_first_element_idx = 128 * 2;
+            }
+            else {
+                token3_first_element_idx = 4096 * 2;
+            }
         }
+        else if (element_count == 32000 * 3) {
+                token3_first_element_idx = 32000 * 2;
+            }        
         else if (element_count == 4096 || element_count == 32000) {
             token3_first_element_idx = 0;
         }
