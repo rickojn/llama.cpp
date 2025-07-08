@@ -2974,7 +2974,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
             token3_first_element_idx = 0;
         }
         if (token3_first_element_idx >= 0) {
-            printf("#%d: %s %s el = %f ne[0] = %d ne[1]= %d ne[2] = %d ne [3] = %d\n", node_n,
+            printf("#%d: %s %s el = %.8f ne[0] = %d ne[1]= %d ne[2] = %d ne [3] = %d\n", node_n,
                 GGML_OP_NAME[node->op], node->name,
                 ((float *) node->data)[token3_first_element_idx],
                 node->ne[0], node->ne[1], node->ne[2], node->ne[3]);
