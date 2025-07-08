@@ -2856,12 +2856,12 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         //     int db = 0;
         // }
 
+        if (node_n == 16){
+            int db = 0;
+        }
         
         ggml_compute_forward(&params, node);
         
-        if (node_n == 74){
-            int db = 0;
-        }
 
 
         //custard
@@ -2963,6 +2963,9 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
             if (node->ne[0] == 128 && node->ne[2] == 32){
                 token3_first_element_idx = 128 * 2;
             }
+            else if (node->ne[0] == 3 && node->ne[1] == 4096){
+                token3_first_element_idx =2;
+            }            
             else {
                 token3_first_element_idx = 4096 * 2;
             }
@@ -2974,9 +2977,16 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
             token3_first_element_idx = 0;
         }
         if (token3_first_element_idx >= 0) {
+            float element = 0.0f;
+            if (node->type == GGML_TYPE_F16){
+                element = ggml_fp16_to_fp32(((uint16_t*)node->data)[token3_first_element_idx]);
+            }
+            else {
+                element = ((float *) node->data)[token3_first_element_idx];
+            }
             printf("#%d: %s %s el = %.8f ne[0] = %d ne[1]= %d ne[2] = %d ne [3] = %d\n", node_n,
                 GGML_OP_NAME[node->op], node->name,
-                ((float *) node->data)[token3_first_element_idx],
+                element,
                 node->ne[0], node->ne[1], node->ne[2], node->ne[3]);
         }
        
