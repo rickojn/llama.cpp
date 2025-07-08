@@ -2856,7 +2856,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         //     int db = 0;
         // }
 
-        if (node_n == 16){
+        if (node_n == 11){
             int db = 0;
         }
         
@@ -2976,7 +2976,7 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         else if (element_count == 4096 || element_count == 32000) {
             token3_first_element_idx = 0;
         }
-        if (token3_first_element_idx >= 0) {
+        if (token3_first_element_idx >= 0 && strncmp(GGML_OP_NAME[node->op], "VIEW", 4)) {
             float element = 0.0f;
             if (node->type == GGML_TYPE_F16){
                 element = ggml_fp16_to_fp32(((uint16_t*)node->data)[token3_first_element_idx]);
